@@ -30,8 +30,10 @@
     cursor: pointer;
     transition: background-color 0.2s ease;
   }
+
+
   
   .sendToAPIBtn:hover {
-    background-color: #3c6046;
+    background-color: #467052;
   }
   
