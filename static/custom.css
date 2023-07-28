@@ -1,0 +1,37 @@
+/* Centered file upload button */
+.centered-button {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  /* Style the file input */
+  .custom-file-upload {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .custom-file-upload:hover {
+    background-color: #0056b3;
+  }
+
+   /* Style the file input */
+   .sendToAPIBtn {
+    padding: 10px 20px;
+    background-color: #089e2e;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .sendToAPIBtn:hover {
+    background-color: #3c6046;
+  }
+  
