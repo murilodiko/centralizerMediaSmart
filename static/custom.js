@@ -1,3 +1,27 @@
+const headerMapping = {
+  "Billable Units": "billable_units",
+  "Campaign ID / Strategy ID": "campaign",
+  "Comitted Units": "commited_units",
+  "Line item name": "name",
+  "Price per Unit": "price_per_unit",
+  "Unit Mapping (KPI)": "unit_mapping",
+  "Type of units (KPI)": "unit_type",
+  "Month": "month",
+  "Year": "year",
+  "External publisher name": "external_name",
+  "External Publisher Cost": "external_cost",
+  "Currency of the external cost": "external_currency",
+  "mediasmart console/external publishers": "type",
+  "Proxy KPI": "proxy_kpi",
+  "Proxy Price": "proxy_price_per_unit",
+  "Insertion Order ID": "io_id",
+  'IO Number': 'io_number',
+  'Organization ID': 'organization',
+  'IO Value (IO Currency)': 'io_value_client_currency',
+  'Entity': 'entity',
+  'Rebate (in %)':'rebate_percent'
+};
+
 document.addEventListener("DOMContentLoaded", function () {
   // Function to handle the file input change event
   document
@@ -45,6 +69,26 @@ document.addEventListener("DOMContentLoaded", function () {
       reader.readAsBinaryString(file);
     });
 
+  function convertTableDataToJson() {
+    var jsonDataArray = [];
+    var tableRows = document.querySelectorAll("#dataTable tbody tr");
+    tableRows.forEach(function (tableRow) {
+      var jsonData = {};
+      var tableCells = tableRow.getElementsByTagName("td");
+      for (var i = 0; i < tableCells.length - 1; i++) {
+        // Skip the last cell (button cell)
+        var header =
+          document.querySelector("#headerRow").children[i].textContent;
+        var cellValue = tableCells[i].textContent;
+        // Use the header mapping to get the corresponding API header
+        var apiHeader = headerMapping[header];
+        jsonData[apiHeader] = cellValue;
+      }
+      jsonDataArray.push(jsonData);
+    });
+    return jsonDataArray;
+  }
+
   // Function to handle the "Send to API" button click event
   document.addEventListener("click", function (event) {
     if (event.target && event.target.id === "sendToAPIBtn") {
@@ -90,12 +134,12 @@ document.addEventListener("DOMContentLoaded", function () {
           console.log("View JSON button clicked");
           // Open a new page or modal to display the JSON data
           // Convert the JSON data to a string
+          var jsonDataArray = convertTableDataToJson();
           var jsonDataString = JSON.stringify(jsonDataArray, null, 2); // null, 2 for pretty formatting
-
-          // Create a new window and set its content to the JSON data
-          var newWindow = window.open("", "_blank");
+          // Open a new page or modal to display the JSON data
+          var newWindow = window.open('', '_blank');
           newWindow.document.open();
-          newWindow.document.write("<pre>" + jsonDataString + "</pre>");
+          newWindow.document.write('<pre>' + jsonDataString + '</pre>');
           newWindow.document.close();
         });
     }
@@ -125,4 +169,153 @@ document.addEventListener("DOMContentLoaded", function () {
         row.style.display = rowVisible ? "" : "none";
       }
     });
+
+  // Function to convert the table data to JSON with translated headers
 });
+
+// ... (Código existente) ...
+
+// Function to handle the "Listar IO's" button click event
+// Function to handle the "Listar IO's" button click event
+
+function listIOs() {
+  fetch('/get_ios_data')
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Error fetching IO data');
+      }
+      return response.json();
+    })
+    .then((iosData) => {
+      console.log(iosData); // Log the IO data to the console
+      fillTableWithData(iosData); // Fill the table with the retrieved data
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
+
+// Function to fill the table with the retrieved data
+function fillTableWithData(data) {
+  var headers = Object.keys(data[0]);
+  var tableHeaderRow = document.querySelector("#headerRow");
+  tableHeaderRow.innerHTML = "";
+
+  // Add an empty header cell at the left start of the header row for the icon column
+  var iconHeaderCell = document.createElement("th");
+  tableHeaderRow.appendChild(iconHeaderCell);
+
+  headers.forEach(function (header) {
+    var tableHeaderCell = document.createElement("th");
+    tableHeaderCell.textContent = header;
+    tableHeaderRow.appendChild(tableHeaderCell);
+  });
+
+  var tableBody = document.querySelector("#dataTable tbody");
+  tableBody.innerHTML = "";
+
+  data.forEach(function (row) {
+    var tableRow = document.createElement("tr");
+
+    // Create the clickable icon (pencil) and add it as the first cell in the row
+    var editIconCell = document.createElement("td");
+    var editIcon = document.createElement("img");
+    editIcon.src = "static/pencil.svg";
+    editIcon.alt = "Edit";
+    editIcon.classList.add("edit-icon");
+    editIconCell.appendChild(editIcon);
+    editIconCell.addEventListener("click", function () {
+      openModalWithData(row);
+    });
+    tableRow.appendChild(editIconCell);
+
+    // Iterate through the properties of the row object
+    for (const property in row) {
+      if (Object.hasOwnProperty.call(row, property)) {
+        let cellValue = row[property];
+
+        // Handle nested objects by converting them to JSON strings
+        if (typeof cellValue === "object" && cellValue !== null) {
+          cellValue = JSON.stringify(cellValue);
+        }
+
+        // Handle lists by joining the elements into a comma-separated string
+        if (Array.isArray(cellValue)) {
+          cellValue = cellValue.join(", ");
+        }
+
+        var tableCell = document.createElement("td");
+        tableCell.textContent = cellValue;
+        tableRow.appendChild(tableCell);
+      }
+    }
+
+    tableBody.appendChild(tableRow);
+    document
+    .getElementById("tableFilter")
+    .addEventListener("input", function (event) {
+      var filterValue = event.target.value.toLowerCase();
+      var tableBody = document.querySelector("#dataTable tbody");
+      var rows = tableBody.getElementsByTagName("tr");
+
+      for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        var cells = row.getElementsByTagName("td");
+        var rowVisible = false;
+
+        for (var j = 0; j < cells.length; j++) {
+          var cellValue = cells[j].textContent.toLowerCase();
+          if (cellValue.indexOf(filterValue) > -1) {
+            // If the filter value is found in the cell's value, make the row visible
+            rowVisible = true;
+            break;
+          }
+        }
+
+        // Set the display property of the row based on its visibility
+        row.style.display = rowVisible ? "" : "none";
+      }
+    });
+  });
+}
+
+
+function openModalWithData(row) {
+  var modal = document.getElementById('editIOModal');
+  var entityField = document.getElementById('entity');
+  var ioValueClientCurrencyField = document.getElementById('ioValueClientCurrency');
+  var rebatePercentField = document.getElementById('rebatePercent');
+  var stateField = document.getElementById('state');
+
+  // Fill the fields with data from the selected row
+  entityField.value = row.entity || '';
+  ioValueClientCurrencyField.value = row.io_value_client_currency || '';
+  rebatePercentField.value = row.rebate_percent || '';
+  stateField.value = row.state || '';
+
+  // Open the modal
+  var editIOModal = new bootstrap.Modal(modal);
+  editIOModal.show();
+}
+
+
+function listLIs() {
+  fetch('/get_li_data')
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Error fetching IO data');
+      }
+      return response.json();
+    })
+    .then((li_data) => {
+      console.log(li_data); // Log the IO data to the console
+      fillTableWithData(li_data); // Fill the table with the retrieved data
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
+
+
+// ... (Código existente) ...
+

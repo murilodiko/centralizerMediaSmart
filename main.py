@@ -1,17 +1,85 @@
-from flask import Flask, Request, render_template, request, redirect, url_for, session
+from flask import Flask, Request, jsonify, render_template, request, redirect, url_for, session
 import datetime
 import requests
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
 # Set a secret key for Flask to handle sessions and cookies securely
-app.secret_key = "your_secret_key"  # Replace with your secret key
+app.secret_key = "12345"  # Replace with your secret key
 
 # Replace these credentials with your API credentials
 API_URL = "https://api.mediasmart.io/login"
+API_GET_IO = "https://api.mediasmart.io/api/insertion_orders"
+API_GET_LI = "https://api.mediasmart.io/api/line_items"
 
 # Define the token expiration time (2 days in seconds)
 TOKEN_EXPIRATION_SECONDS = 2 * 24 * 60 * 60
 
+@app.route('/get_li_data', methods=['GET'])
+def get_li_data():
+    # Check if the user has a valid token in the session
+    token = session.get('token')
+    if not token or not is_token_valid():
+        # If the token is invalid or expired, return an error response
+        return jsonify({'error': 'Invalid or expired token'}), 401
+
+    # Make a GET request to the API to fetch the IO's data
+    headers = {'Authorization': token}
+    response = requests.get(API_GET_LI, headers=headers)
+
+    if response.status_code == 200:
+        data = response.json()
+        print(data)
+        return jsonify(data), 200
+    else:
+        return jsonify({'error': 'Error fetching IO data'}), response.status_code
+
+
+# Keep the existing /list_ios route for rendering the template
+@app.route('/list_li', methods=['GET'])
+def list_li():
+    # Check if the user has a valid token in the session
+    token = session.get('token')
+    if not token or not is_token_valid():
+        # If the token is invalid or expired, redirect to the login page
+        session.pop('token', None)  # Remove the invalid token from the session
+        session.pop('token_expiration', None)  # Remove the token expiration timestamp from the session
+        return redirect(url_for('login'))
+
+    return render_template('lineitem_list.html')
+
+
+@app.route('/get_ios_data', methods=['GET'])
+def get_ios_data():
+    # Check if the user has a valid token in the session
+    token = session.get('token')
+    if not token or not is_token_valid():
+        # If the token is invalid or expired, return an error response
+        return jsonify({'error': 'Invalid or expired token'}), 401
+
+    # Make a GET request to the API to fetch the IO's data
+    headers = {'Authorization': token}
+    response = requests.get(API_GET_IO, headers=headers)
+
+    if response.status_code == 200:
+        data = response.json()
+        print(data)
+        return jsonify(data), 200
+    else:
+        return jsonify({'error': 'Error fetching IO data'}), response.status_code
+
+
+# Keep the existing /list_ios route for rendering the template
+@app.route('/list_ios', methods=['GET'])
+def list_ios():
+    # Check if the user has a valid token in the session
+    token = session.get('token')
+    if not token or not is_token_valid():
+        # If the token is invalid or expired, redirect to the login page
+        session.pop('token', None)  # Remove the invalid token from the session
+        session.pop('token_expiration', None)  # Remove the token expiration timestamp from the session
+        return redirect(url_for('login'))
+
+    return render_template('ios_list.html')
 
 @app.route('/')
 def index():
