@@ -35,7 +35,7 @@
   </div>
 </div>
 
-<!-- Edit IO Modal -->
+<!-- Edit Line Item Modal -->
 <div class="modal" id="editLIModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -46,23 +46,114 @@
           </button>
         </div>
         <div class="modal-body">
-          <!-- Edit LI Form -->
+          <!-- Edit Line Item Form -->
           <form id="editLIForm">
+            <!-- Name -->
             <div class="form-group">
-              <label for="entity">Entity</label>
-              <input type="text" class="form-control" id="entity" name="entity" readonly>
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" name="name">
+              </div>
+              <!-- ID -->
+            <div class="form-group">
+                <label for="id">ID</label>
+                <input type="text" class="form-control" id="id" name="id" readonly>
+              </div>
+            <!-- Billable Units -->
+            <div class="form-group">
+              <label for="billable_units">Billable Units</label>
+              <textarea type="text" class="form-control" id="billable_units" name="billable_units"></textarea>
+              
             </div>
+  
+            <!-- Campaigns -->
+            <div class="form-group">
+              <label for="campaigns">Campaigns</label>
+              <input type="text" class="form-control" id="campaigns" name="campaigns">
+            </div>
+  
+            <!-- Commited Units -->
+            <div class="form-group">
+              <label for="commited_units">Commited Units</label>
+              <input type="text" class="form-control" id="commited_units" name="commited_units">
+            </div>
+  
+            <!-- External Cost -->
+            <div class="form-group">
+              <label for="external_cost">External Cost</label>
+              <input type="text" class="form-control" id="external_cost" name="external_cost">
+            </div>
+  
+            <!-- External Currency -->
+            <div class="form-group">
+              <label for="external_currency">External Currency</label>
+              <input type="text" class="form-control" id="external_currency" name="external_currency">
+            </div>
+  
+            <!-- External Name -->
+            <div class="form-group">
+              <label for="external_name">External Name</label>
+              <input type="text" class="form-control" id="external_name" name="external_name">
+            </div>
+  
+            
+  
+            
+  
+            <!-- Price Per Unit -->
+            <div class="form-group">
+              <label for="price_per_unit">Price Per Unit</label>
+              <input type="text" class="form-control" id="price_per_unit" name="price_per_unit">
+            </div>
+  
+            <!-- Proxy KPI -->
+            <div class="form-group">
+              <label for="proxy_kpi">Proxy KPI</label>
+              <input type="text" class="form-control" id="proxy_kpi" name="proxy_kpi">
+            </div>
+  
+            <!-- Proxy Price Per Unit -->
+            <div class="form-group">
+              <label for="proxy_price_per_unit">Proxy Price Per Unit</label>
+              <input type="text" class="form-control" id="proxy_price_per_unit" name="proxy_price_per_unit">
+            </div>
+  
+            <!-- State -->
+            <div class="form-group">
+              <label for="state">State</label>
+              <input type="text" class="form-control" id="state" name="state" readonly>
+            </div>
+  
+            <!-- Type -->
+            <div class="form-group">
+              <label for="type">Type</label>
+              <input type="text" class="form-control" id="type" name="type">
+            </div>
+  
+            <!-- Unit Mapping -->
+            <div class="form-group">
+              <label for="unit_mapping">Unit Mapping</label>
+              <input type="text" class="form-control" id="unit_mapping" name="unit_mapping">
+            </div>
+  
+            <!-- Unit Type -->
+            <div class="form-group">
+              <label for="unit_type">Unit Type</label>
+              <input type="text" class="form-control" id="unit_type" name="unit_type">
+            </div>
+  
           </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-success" id="updateButton" style="display: none;">Update</button>
         </div>
       </div>
     </div>
   </div>
   
+  
 
-<!-- Convert ios_data to JSON string and store in a JavaScript variable -->
+
 
 
 <script src="{{ url_for('static', filename='custom.js') }}"></script>

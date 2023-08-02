@@ -6,8 +6,6 @@ const headerMapping = {
   "Price per Unit": "price_per_unit",
   "Unit Mapping (KPI)": "unit_mapping",
   "Type of units (KPI)": "unit_type",
-  Month: "month",
-  Year: "year",
   "External publisher name": "external_name",
   "External Publisher Cost": "external_cost",
   "Currency of the external cost": "external_currency",
@@ -18,8 +16,10 @@ const headerMapping = {
   "IO Number": "io_number",
   "Organization ID": "organization",
   "IO Value (IO Currency)": "io_value_client_currency",
-  Entity: "entity",
+  "Entity": "entity",
   "Rebate (in %)": "rebate_percent",
+  "month": "month",
+  "year": "year"
 };
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -207,78 +207,171 @@ function fillTableWithData(data, currentPage) {
   tableHeaderRow.appendChild(iconHeaderCell);
 
   headers.forEach(function (header) {
-    var tableHeaderCell = document.createElement("th");
-    tableHeaderCell.textContent = header;
-    tableHeaderRow.appendChild(tableHeaderCell);
+    if (header !== "billable_units") {
+      // Exclude the "billable_units" field from the header row
+      var tableHeaderCell = document.createElement("th");
+      tableHeaderCell.textContent = header;
+      tableHeaderRow.appendChild(tableHeaderCell);
+    } else {
+      // If "billable_units" field is found, add three separate headers for month, year, and units
+      var tableHeaderCellMonth = document.createElement("th");
+      tableHeaderCellMonth.textContent = "Month";
+      tableHeaderRow.appendChild(tableHeaderCellMonth);
+
+      var tableHeaderCellYear = document.createElement("th");
+      tableHeaderCellYear.textContent = "Year";
+      tableHeaderRow.appendChild(tableHeaderCellYear);
+
+      var tableHeaderCellUnits = document.createElement("th");
+      tableHeaderCellUnits.textContent = "Units";
+      tableHeaderRow.appendChild(tableHeaderCellUnits);
+    }
   });
 
   var tableBody = document.querySelector("#dataTable tbody");
   tableBody.innerHTML = "";
 
   data.forEach(function (row) {
-    var tableRow = document.createElement("tr");
+    // Check if "billable_units" is an array and iterate over each object inside it
+    if (Array.isArray(row.billable_units)) {
+      row.billable_units.forEach(function (billableUnit) {
+        var tableRow = document.createElement("tr");
 
-    // Create the clickable icon (pencil) and add it as the first cell in the row
-    var editIconCell = document.createElement("td");
-    var editIcon = document.createElement("img");
-    editIcon.src = "static/pencil.svg";
-    editIcon.alt = "Edit";
-    editIcon.classList.add("edit-icon");
-    editIconCell.appendChild(editIcon);
-    editIconCell.addEventListener("click", function () {
-      openModalWithData(currentPage, row);
-    });
-    tableRow.appendChild(editIconCell);
+        // Create the clickable icon (pencil) and add it as the first cell in the row
+        var editIconCell = document.createElement("td");
+        var editIcon = document.createElement("img");
+        editIcon.src = "static/pencil.svg";
+        editIcon.alt = "Edit";
+        editIcon.classList.add("edit-icon");
+        editIconCell.appendChild(editIcon);
+        editIconCell.addEventListener("click", function () {
+          openModalWithData(currentPage, row);
+        });
+        tableRow.appendChild(editIconCell);
 
-    // Iterate through the properties of the row object
-    for (const property in row) {
-      if (Object.hasOwnProperty.call(row, property)) {
-        let cellValue = row[property];
+        for (const property in row) {
+          if (Object.hasOwnProperty.call(row, property)) {
+            if (property !== "billable_units") {
+              // Exclude the "billable_units" field from the table cells
+              let cellValue = row[property];
 
-        // Handle nested objects by converting them to JSON strings
-        if (typeof cellValue === "object" && cellValue !== null) {
-          cellValue = JSON.stringify(cellValue);
-        }
+              // Handle nested objects by converting them to JSON strings
+              if (typeof cellValue === "object" && cellValue !== null) {
+                cellValue = JSON.stringify(cellValue);
+              }
 
-        // Handle lists by joining the elements into a comma-separated string
-        if (Array.isArray(cellValue)) {
-          cellValue = cellValue.join(", ");
-        }
+              // Handle lists by joining the elements into a comma-separated string
+              if (Array.isArray(cellValue)) {
+                cellValue = cellValue.join(", ");
+              }
 
-        var tableCell = document.createElement("td");
-        tableCell.textContent = cellValue;
-        tableRow.appendChild(tableCell);
-      }
-    }
+              var tableCell = document.createElement("td");
+              tableCell.textContent = cellValue;
+              tableRow.appendChild(tableCell);
+            } else {
+              // If "billable_units" field is found, split it into month, year, and units
+              var tableCellMonth = document.createElement("td");
+              var tableCellYear = document.createElement("td");
+              var tableCellUnits = document.createElement("td");
 
-    tableBody.appendChild(tableRow);
-    document
-      .getElementById("tableFilter")
-      .addEventListener("input", function (event) {
-        var filterValue = event.target.value.toLowerCase();
-        var tableBody = document.querySelector("#dataTable tbody");
-        var rows = tableBody.getElementsByTagName("tr");
+              tableCellMonth.textContent = billableUnit.month || "";
+              tableCellYear.textContent = billableUnit.year || "";
+              tableCellUnits.textContent = billableUnit.units || "";
 
-        for (var i = 0; i < rows.length; i++) {
-          var row = rows[i];
-          var cells = row.getElementsByTagName("td");
-          var rowVisible = false;
-
-          for (var j = 0; j < cells.length; j++) {
-            var cellValue = cells[j].textContent.toLowerCase();
-            if (cellValue.indexOf(filterValue) > -1) {
-              // If the filter value is found in the cell's value, make the row visible
-              rowVisible = true;
-              break;
+              tableRow.appendChild(tableCellMonth);
+              tableRow.appendChild(tableCellYear);
+              tableRow.appendChild(tableCellUnits);
             }
           }
-
-          // Set the display property of the row based on its visibility
-          row.style.display = rowVisible ? "" : "none";
         }
+
+        tableBody.appendChild(tableRow);
       });
+    } else {
+      // If "billable_units" is not an array, create a single row for the object
+      var tableRow = document.createElement("tr");
+
+      // Create the clickable icon (pencil) and add it as the first cell in the row
+      var editIconCell = document.createElement("td");
+      var editIcon = document.createElement("img");
+      editIcon.src = "static/pencil.svg";
+      editIcon.alt = "Edit";
+      editIcon.classList.add("edit-icon");
+      editIconCell.appendChild(editIcon);
+      editIconCell.addEventListener("click", function () {
+        openModalWithData(currentPage, row);
+      });
+      tableRow.appendChild(editIconCell);
+
+      for (const property in row) {
+        if (Object.hasOwnProperty.call(row, property)) {
+          if (property !== "billable_units") {
+            // Exclude the "billable_units" field from the table cells
+            let cellValue = row[property];
+
+            // Handle nested objects by converting them to JSON strings
+            if (typeof cellValue === "object" && cellValue !== null) {
+              cellValue = JSON.stringify(cellValue);
+            }
+
+            // Handle lists by joining the elements into a comma-separated string
+            if (Array.isArray(cellValue)) {
+              cellValue = cellValue.join(", ");
+            }
+
+            var tableCell = document.createElement("td");
+            tableCell.textContent = cellValue;
+            tableRow.appendChild(tableCell);
+          } else {
+            // If "billable_units" field is found but not an array, create empty cells for month, year, and units
+            var tableCellMonth = document.createElement("td");
+            var tableCellYear = document.createElement("td");
+            var tableCellUnits = document.createElement("td");
+
+            tableCellMonth.textContent = "";
+            tableCellYear.textContent = "";
+            tableCellUnits.textContent = "";
+
+            tableRow.appendChild(tableCellMonth);
+            tableRow.appendChild(tableCellYear);
+            tableRow.appendChild(tableCellUnits);
+          }
+        }
+      }
+
+      tableBody.appendChild(tableRow);
+    }
   });
+
+  document
+    .getElementById("tableFilter")
+    .addEventListener("input", function (event) {
+      var filterValue = event.target.value.toLowerCase();
+      var tableBody = document.querySelector("#dataTable tbody");
+      var rows = tableBody.getElementsByTagName("tr");
+
+      for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        var cells = row.getElementsByTagName("td");
+        var rowVisible = false;
+
+        for (var j = 0; j < cells.length; j++) {
+          var cellValue = cells[j].textContent.toLowerCase();
+          if (cellValue.indexOf(filterValue) > -1) {
+            // If the filter value is found in the cell's value, make the row visible
+            rowVisible = true;
+            break;
+          }
+        }
+
+        // Set the display property of the row based on its visibility
+        row.style.display = rowVisible ? "" : "none";
+      }
+    });
 }
+
+
+
 
 function openModalWithData(page, row) {
   var modal;
@@ -289,15 +382,61 @@ function openModalWithData(page, row) {
   var ioNumberField;
   var organization;
   var ioID;
+  var entityField;
+  var billableUnitsField;
+  var campaignsField;
+  var commitedUnitsField;
+  var externalCostField;
+  var externalCurrencyField;
+  var externalNameField;
+  var LIidField;
+  var nameField;
+  var pricePerUnitField;
+  var proxyKPIField;
+  var proxyPricePerUnitField;
+  var stateField;
+  var typeField;
+  var unitMappingField;
+  var unitTypeField;
   var token = document.body.getAttribute("data-token");
 
 
   if (page === "LineItem") {
     modal = document.getElementById("editLIModal");
-    entityField = document.getElementById("entity");
+    billableUnitsField = document.getElementById("billable_units");
+    campaignsField = document.getElementById("campaigns");
+    commitedUnitsField = document.getElementById("commited_units");
+    externalCostField = document.getElementById("external_cost");
+    externalCurrencyField = document.getElementById("external_currency");
+    externalNameField = document.getElementById("external_name");
+    LIidField = document.getElementById("id");
+    nameField = document.getElementById("name");
+    pricePerUnitField = document.getElementById("price_per_unit");
+    proxyKPIField = document.getElementById("proxy_kpi");
+    proxyPricePerUnitField = document.getElementById("proxy_price_per_unit");
+    stateField = document.getElementById("state");
+    typeField = document.getElementById("type");
+    unitMappingField = document.getElementById("unit_mapping");
+    unitTypeField = document.getElementById("unit_type");
 
     // Fill the common fields with data from the selected row
-    entityField.value = row.entity || "";
+    billableUnitsField.textContent = JSON.stringify(row.billable_units) || "";
+    campaignsField.value = row.campaigns || "";
+    commitedUnitsField.value = row.commited_units || "";
+    externalCostField.value = row.external_cost || "";
+    externalCurrencyField.value = row.external_currency || "";
+    externalNameField.value = row.external_name || "";
+    LIidField.value = row.id || "";
+    nameField.value = row.name || "";
+    pricePerUnitField.value = row.price_per_unit || "";
+    proxyKPIField.value = row.proxy_kpi || "";
+    proxyPricePerUnitField.value = row.proxy_price_per_unit || "";
+    stateField.value = row.state || "";
+    typeField.value = row.type || "";
+    unitMappingField.value = row.unit_mapping || "";
+    unitTypeField.value = row.unit_type || "";
+
+
   } else if (page === "LineIO") {
     modal = document.getElementById("editIOModal");
     entityField = document.getElementById("entity");
