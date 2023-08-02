@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}IO List{% endblock %}
+{% block title %}Line Items List{% endblock %}
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}">
 
@@ -36,33 +36,21 @@
 </div>
 
 <!-- Edit IO Modal -->
-<div class="modal" id="editIOModal" tabindex="-1">
+<div class="modal" id="editLIModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Edit IO</h5>
+          <h5 class="modal-title">Edit Line Item</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-          <!-- Edit IO Form -->
-          <form id="editIOForm">
+          <!-- Edit LI Form -->
+          <form id="editLIForm">
             <div class="form-group">
               <label for="entity">Entity</label>
               <input type="text" class="form-control" id="entity" name="entity" readonly>
-            </div>
-            <div class="form-group">
-              <label for="ioValueClientCurrency">IO Value (IO Currency)</label>
-              <input type="text" class="form-control" id="ioValueClientCurrency" name="ioValueClientCurrency" readonly>
-            </div>
-            <div class="form-group">
-              <label for="rebatePercent">Rebate (in %)</label>
-              <input type="text" class="form-control" id="rebatePercent" name="rebatePercent" readonly>
-            </div>
-            <div class="form-group">
-              <label for="state">State</label>
-              <input type="text" class="form-control" id="state" name="state" readonly>
             </div>
           </form>
         </div>

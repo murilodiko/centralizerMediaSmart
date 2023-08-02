@@ -45,7 +45,7 @@ def list_li():
         session.pop('token_expiration', None)  # Remove the token expiration timestamp from the session
         return redirect(url_for('login'))
 
-    return render_template('lineitem_list.html')
+    return render_template('lineitem_list.html', token=token)
 
 
 @app.route('/get_ios_data', methods=['GET'])
@@ -79,7 +79,7 @@ def list_ios():
         session.pop('token_expiration', None)  # Remove the token expiration timestamp from the session
         return redirect(url_for('login'))
 
-    return render_template('ios_list.html')
+    return render_template('ios_list.html', token=token)
 
 @app.route('/')
 def index():

@@ -6,8 +6,8 @@ const headerMapping = {
   "Price per Unit": "price_per_unit",
   "Unit Mapping (KPI)": "unit_mapping",
   "Type of units (KPI)": "unit_type",
-  "Month": "month",
-  "Year": "year",
+  Month: "month",
+  Year: "year",
   "External publisher name": "external_name",
   "External Publisher Cost": "external_cost",
   "Currency of the external cost": "external_currency",
@@ -15,11 +15,11 @@ const headerMapping = {
   "Proxy KPI": "proxy_kpi",
   "Proxy Price": "proxy_price_per_unit",
   "Insertion Order ID": "io_id",
-  'IO Number': 'io_number',
-  'Organization ID': 'organization',
-  'IO Value (IO Currency)': 'io_value_client_currency',
-  'Entity': 'entity',
-  'Rebate (in %)':'rebate_percent'
+  "IO Number": "io_number",
+  "Organization ID": "organization",
+  "IO Value (IO Currency)": "io_value_client_currency",
+  Entity: "entity",
+  "Rebate (in %)": "rebate_percent",
 };
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -137,9 +137,9 @@ document.addEventListener("DOMContentLoaded", function () {
           var jsonDataArray = convertTableDataToJson();
           var jsonDataString = JSON.stringify(jsonDataArray, null, 2); // null, 2 for pretty formatting
           // Open a new page or modal to display the JSON data
-          var newWindow = window.open('', '_blank');
+          var newWindow = window.open("", "_blank");
           newWindow.document.open();
-          newWindow.document.write('<pre>' + jsonDataString + '</pre>');
+          newWindow.document.write("<pre>" + jsonDataString + "</pre>");
           newWindow.document.close();
         });
     }
@@ -179,16 +179,17 @@ document.addEventListener("DOMContentLoaded", function () {
 // Function to handle the "Listar IO's" button click event
 
 function listIOs() {
-  fetch('/get_ios_data')
+  fetch("/get_ios_data")
     .then((response) => {
       if (!response.ok) {
-        throw new Error('Error fetching IO data');
+        throw new Error("Error fetching IO data");
       }
       return response.json();
     })
     .then((iosData) => {
       console.log(iosData); // Log the IO data to the console
-      fillTableWithData(iosData); // Fill the table with the retrieved data
+      currentPage = "LineIO";
+      fillTableWithData(iosData, currentPage); // Fill the table with the retrieved data
     })
     .catch((error) => {
       console.error(error);
@@ -196,7 +197,7 @@ function listIOs() {
 }
 
 // Function to fill the table with the retrieved data
-function fillTableWithData(data) {
+function fillTableWithData(data, currentPage) {
   var headers = Object.keys(data[0]);
   var tableHeaderRow = document.querySelector("#headerRow");
   tableHeaderRow.innerHTML = "";
@@ -225,7 +226,7 @@ function fillTableWithData(data) {
     editIcon.classList.add("edit-icon");
     editIconCell.appendChild(editIcon);
     editIconCell.addEventListener("click", function () {
-      openModalWithData(row);
+      openModalWithData(currentPage, row);
     });
     tableRow.appendChild(editIconCell);
 
@@ -252,70 +253,183 @@ function fillTableWithData(data) {
 
     tableBody.appendChild(tableRow);
     document
-    .getElementById("tableFilter")
-    .addEventListener("input", function (event) {
-      var filterValue = event.target.value.toLowerCase();
-      var tableBody = document.querySelector("#dataTable tbody");
-      var rows = tableBody.getElementsByTagName("tr");
+      .getElementById("tableFilter")
+      .addEventListener("input", function (event) {
+        var filterValue = event.target.value.toLowerCase();
+        var tableBody = document.querySelector("#dataTable tbody");
+        var rows = tableBody.getElementsByTagName("tr");
 
-      for (var i = 0; i < rows.length; i++) {
-        var row = rows[i];
-        var cells = row.getElementsByTagName("td");
-        var rowVisible = false;
+        for (var i = 0; i < rows.length; i++) {
+          var row = rows[i];
+          var cells = row.getElementsByTagName("td");
+          var rowVisible = false;
 
-        for (var j = 0; j < cells.length; j++) {
-          var cellValue = cells[j].textContent.toLowerCase();
-          if (cellValue.indexOf(filterValue) > -1) {
-            // If the filter value is found in the cell's value, make the row visible
-            rowVisible = true;
-            break;
+          for (var j = 0; j < cells.length; j++) {
+            var cellValue = cells[j].textContent.toLowerCase();
+            if (cellValue.indexOf(filterValue) > -1) {
+              // If the filter value is found in the cell's value, make the row visible
+              rowVisible = true;
+              break;
+            }
           }
-        }
 
-        // Set the display property of the row based on its visibility
-        row.style.display = rowVisible ? "" : "none";
-      }
-    });
+          // Set the display property of the row based on its visibility
+          row.style.display = rowVisible ? "" : "none";
+        }
+      });
   });
 }
 
+function openModalWithData(page, row) {
+  var modal;
+  var entityField;
+  var ioValueClientCurrencyField;
+  var rebatePercentField;
+  var stateField;
+  var ioNumberField;
+  var organization;
+  var ioID;
+  var token = document.body.getAttribute("data-token");
 
-function openModalWithData(row) {
-  var modal = document.getElementById('editIOModal');
-  var entityField = document.getElementById('entity');
-  var ioValueClientCurrencyField = document.getElementById('ioValueClientCurrency');
-  var rebatePercentField = document.getElementById('rebatePercent');
-  var stateField = document.getElementById('state');
 
-  // Fill the fields with data from the selected row
-  entityField.value = row.entity || '';
-  ioValueClientCurrencyField.value = row.io_value_client_currency || '';
-  rebatePercentField.value = row.rebate_percent || '';
-  stateField.value = row.state || '';
+  if (page === "LineItem") {
+    modal = document.getElementById("editLIModal");
+    entityField = document.getElementById("entity");
+
+    // Fill the common fields with data from the selected row
+    entityField.value = row.entity || "";
+  } else if (page === "LineIO") {
+    modal = document.getElementById("editIOModal");
+    entityField = document.getElementById("entity");
+    ioValueClientCurrencyField = document.getElementById("ioValueClientCurrency");
+    rebatePercentField = document.getElementById("rebatePercent");
+    stateField = document.getElementById("state");
+    ioNumberField = document.getElementById("ioNumber");
+    organization = document.getElementById("organization");
+    ioID = document.getElementById("ioID");
+
+    // Fill the common fields with data from the selected row
+    entityField.value = row.entity || "";
+    ioValueClientCurrencyField.value = row.io_value_client_currency || "";
+    rebatePercentField.value = row.rebate_percent || "";
+    stateField.value = row.state || "";
+    ioNumberField.value = row.io_number || "";
+    organization.value = row.organization || "";
+    ioID.value = row.id || "";
+  }
 
   // Open the modal
-  var editIOModal = new bootstrap.Modal(modal);
-  editIOModal.show();
+  var editModal = new bootstrap.Modal(modal);
+  editModal.show();
+
+  
+
+  // Handle the "Update" button click inside the modal
+  var updateButton = document.getElementById("updateButton");
+  updateButton.addEventListener("click", function () {
+    var updatedData;
+
+    if (page === "LineItem") {
+      updatedData = {
+        entity: entityField.value,
+        // Add other fields specific to LineItem page as needed
+      };
+
+      // Perform the API call here with the updatedData
+      // For example, using fetch and the appropriate API endpoint
+      fetch("/update_lineitem", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedData),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("LineItem data updated:", data);
+          // Close the modal after updating
+          editModal.hide();
+        })
+        .catch((error) => {
+          console.error("Error updating LineItem data:", error);
+        });
+    } else if (page === "LineIO") {
+      updatedData = {
+        entity: entityField.value,
+        io_value_client_currency: ioValueClientCurrencyField.value,
+        rebate_percent: rebatePercentField.value,
+        state: stateField.value,
+        io_number: ioNumberField.value,
+        organization: organization.value
+        // Add other fields specific to LineIO page as needed
+      };
+      console.log(updatedData);
+
+      // Perform the API call here with the updatedData
+      // For example, using fetch and the appropriate API endpoint
+      fetch("https://api.mediasmart.io/api/insertion_orders/" + ioID.value, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": token,
+        },
+        body: JSON.stringify(updatedData),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("LineIO data updated:", data);
+          // Close the modal after updating
+          editModal.hide();
+          fetch("/get_ios_data")
+            .then((response) => response.json())
+            .then((updatedData) =>{
+              fillTableWithData(updatedData, page);
+
+            })
+            .catch((error) => {
+              console.error("Error fetching updated data:", error);
+            })
+        })
+        .catch((error) => {
+          console.error("Error updating LineIO data:", error);
+        });
+    }
+  });
+}
+
+// Attach event listeners to input fields
+document.addEventListener("DOMContentLoaded", function () {
+  var inputFields = document.querySelectorAll(".modal input");
+  inputFields.forEach(function (field) {
+    field.addEventListener("input", handleInputChange);
+  });
+});
+
+// Function to handle input changes and show the "Update" button
+function handleInputChange() {
+  var updateButton = document.getElementById("updateButton");
+  updateButton.style.display = "inline-block";
 }
 
 
+
+
 function listLIs() {
-  fetch('/get_li_data')
+  fetch("/get_li_data")
     .then((response) => {
       if (!response.ok) {
-        throw new Error('Error fetching IO data');
+        throw new Error("Error fetching IO data");
       }
       return response.json();
     })
     .then((li_data) => {
       console.log(li_data); // Log the IO data to the console
-      fillTableWithData(li_data); // Fill the table with the retrieved data
+      currentPage = "LineItem";
+      fillTableWithData(li_data, currentPage); // Fill the table with the retrieved data
     })
     .catch((error) => {
       console.error(error);
     });
 }
 
-
 // ... (Código existente) ...
-

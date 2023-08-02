@@ -49,25 +49,42 @@
           <!-- Edit IO Form -->
           <form id="editIOForm">
             <div class="form-group">
+                <label for="entity">IO Number</label>
+                <input type="text" class="form-control" id="ioNumber" name="ioNumber" >
+              </div>
+              <div class="form-group">
+                <label for="entity">IO ID</label>
+                <input type="text" class="form-control" id="ioID" name="ioID" readonly>
+              </div>
+            <div class="form-group">
+                <label for="entity">Organization</label>
+                <input type="text" class="form-control" id="organization" name="organization" >
+              </div>
+            <div class="form-group">
               <label for="entity">Entity</label>
-              <input type="text" class="form-control" id="entity" name="entity" readonly>
+              <input type="text" class="form-control" id="entity" name="entity" >
             </div>
             <div class="form-group">
               <label for="ioValueClientCurrency">IO Value (IO Currency)</label>
-              <input type="text" class="form-control" id="ioValueClientCurrency" name="ioValueClientCurrency" readonly>
+              <input type="text" class="form-control" id="ioValueClientCurrency" name="ioValueClientCurrency" >
             </div>
             <div class="form-group">
               <label for="rebatePercent">Rebate (in %)</label>
-              <input type="text" class="form-control" id="rebatePercent" name="rebatePercent" readonly>
+              <input type="text" class="form-control" id="rebatePercent" name="rebatePercent" >
             </div>
             <div class="form-group">
               <label for="state">State</label>
               <input type="text" class="form-control" id="state" name="state" readonly>
             </div>
+
+           
+
+
           </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-success" id="updateButton" style="display: none;">Update</button>
         </div>
       </div>
     </div>
